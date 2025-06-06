@@ -7,16 +7,16 @@ export default function List() {
   const [searchQuery, setSearchQuery] = useState("");
   
   const documents = [
-    { name: "Mokfembam Fabrice", documentNumber: "00012345678901", date: "13-05-25" },
-    { name: "Takem Jim", documentNumber: "00023456789012", date: "13-05-25" },
-    { name: "Steve Ngomba", documentNumber: "00034567890123", date: "13-05-25" },
-    { name: "Aisha Bello", documentNumber: "00045678901234", date: "13-05-25" },
-    { name: "Chinedu Okeke", documentNumber: "00056789012345", date: "13-05-25" },
-    { name: "Fatima Yusuf", documentNumber: "00067890123456", date: "13-05-25" },
-    { name: "Kwame Mensah", documentNumber: "00078901234567", date: "13-05-25" },
-    { name: "Nia Thomas", documentNumber: "00089012345678", date: "13-05-25" },
-    { name: "Obi Eze", documentNumber: "00090123456789", date: "13-05-25" },
-    { name: "Zara Ali", documentNumber: "00101234567890", date: "13-05-25" },
+    { name: "John Smith", documentNumber: "BC123456", date: "01/01/2000" },
+    { name: "Jane Doe", documentNumber: "BC654321", date: "15/03/1995" },
+    { name: "Michael Johnson", documentNumber: "BC789012", date: "22/07/1988" },
+    { name: "Sarah Williams", documentNumber: "BC345678", date: "05/11/1992" },
+    { name: "David Brown", documentNumber: "BC901234", date: "30/09/1985" },
+    { name: "Emily Davis", documentNumber: "BC567890", date: "14/02/1998" },
+    { name: "Robert Wilson", documentNumber: "BC123890", date: "08/12/1979" },
+    { name: "Jessica Taylor", documentNumber: "BC456123", date: "19/04/1991" },
+    { name: "Daniel Anderson", documentNumber: "BC789456", date: "27/10/1983" },
+    { name: "Olivia Martinez", documentNumber: "BC321654", date: "03/06/1997" },
   ];
 
   const filteredDocuments = documents.filter((doc) =>
@@ -27,10 +27,10 @@ export default function List() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <View className="py-4 px-4">
-        <Text className="text-xl font-semibold mb-4">Your Lists</Text>
+        <Text className="text-xl font-semibold mb-4">Your Documents</Text>
         <TextInput
           className="border border-gray-300 rounded-xl p-4 mb-4 text-base bg-white shadow-sm h-14"
-          placeholder="Search by name or certificate number"
+          placeholder="Search by name or certificate ID"
           placeholderTextColor="#64748b"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -45,6 +45,8 @@ export default function List() {
             />
           )}
           keyExtractor={(item, index) => index.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 70 }}
         />
       </View>
     </SafeAreaView>

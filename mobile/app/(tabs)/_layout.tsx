@@ -6,77 +6,55 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          height: 100, 
-          paddingBottom: 20, 
-          paddingTop: 10, 
-        },
-        tabBarItemStyle: {
-          margin: 5,
-          borderRadius: 10,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12, 
-          marginTop: 4, 
-          fontWeight: '500', 
-        },
-        tabBarActiveTintColor: '#6366f1', 
+        tabBarStyle: { height: 100, paddingBottom: 20, paddingTop: 10 },
+        tabBarItemStyle: { margin: 5, borderRadius: 10 },
+        tabBarLabelStyle: { fontSize: 12, marginTop: 4, fontWeight: '500' },
+        tabBarActiveTintColor: '#2196F3',
         tabBarInactiveTintColor: '#64748b',
       }}
     >
-      <Tabs.Screen 
-       name="(home)"
+      <Tabs.Screen
+        name="index"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <Feather 
-              name="home" 
-              color={color} 
-              size={focused ? 28 : 24}
-              className={focused ? "text-indigo-500" : "text-slate-500"}
-            />
+            <Feather name="home" color={color} size={focused ? 28 : 24} />
           ),
         }}
       />
-      <Tabs.Screen 
-        name="list"
+      <Tabs.Screen
+        name="scan"
         options={{
-          title: 'Lists',
+          title: 'scan',
           tabBarIcon: ({ color, focused }) => (
-            <Feather 
-              name="list" 
-              color={color} 
-              size={focused ? 28 : 24}
-              className={focused ? "text-indigo-500" : "text-slate-500"}
-            />
+            <Feather name="camera" color={color} size={focused ? 28 : 24} />
           ),
         }}
       />
-      <Tabs.Screen 
+         <Tabs.Screen
         name="create"
         options={{
           title: 'Create',
           tabBarIcon: ({ color, focused }) => (
-            <Feather 
-              name="plus-circle" 
-              color={color} 
-              size={focused ? 28 : 24}
-              className={focused ? "text-indigo-500" : "text-slate-500"}
-            />
+            <Feather name="plus-circle" color={color} size={focused ? 28 : 24} />
           ),
         }}
       />
-      <Tabs.Screen 
-        name="profile"
+        <Tabs.Screen
+        name="list"
         options={{
-          title: 'Profile',
+          title: 'Search',
           tabBarIcon: ({ color, focused }) => (
-            <Feather 
-              name="user" 
-              color={color} 
-              size={focused ? 28 : 24}
-              className={focused ? "text-indigo-500" : "text-slate-500"}
-            />
+            <Feather name="search" color={color} size={focused ? 28 : 24} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="audit"
+        options={{
+          title: 'Audit',
+          tabBarIcon: ({ color, focused }) => (
+            <Feather name="check-square" color={color} size={focused ? 28 : 24} />
           ),
         }}
       />

@@ -1,4 +1,10 @@
 import React from "react";
+import CertificateHeader from "../components/PreviewComponents/CertificateHeader";
+import CertificateField from "../components/PreviewComponents/CertificateField";
+import CertificateTitle from "../components/PreviewComponents/CertificateTitle";
+import ReferenceDocumentNote from "../components/PreviewComponents/ReferenceDocNote";
+import CertificateFooter from "../components/PreviewComponents/CertificateFooter";
+
 
 interface FormData {
   certificateNumber?: string;
@@ -29,6 +35,7 @@ interface FormData {
 
 interface CreateProps {
   formData?: FormData;
+  pdfRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const DEFAULT_FORM_DATA: FormData = {
@@ -58,68 +65,40 @@ const DEFAULT_FORM_DATA: FormData = {
   secretary: "sec",
 };
 
-const BirthCertificatePreviewForm: React.FC<CreateProps> = ({ formData = DEFAULT_FORM_DATA }) => {
+const BirthCertificatePreviewForm: React.FC<CreateProps> = ({
+  formData = DEFAULT_FORM_DATA,
+  pdfRef,
+}) => {
   return (
-    <div className='certificate-container bg-white w-[55vw] p-8 shadow-sm font-serif'>
-      <div id='certificate-preview' className='w-full h-full flex flex-col items-center text-black'>
-        <div>
-                 {/* Header Section */}
-        <div className='flex justify-between text-sm  mb-2'>
-          <div className='text-center'>
-            <p className='text-xl'>RÉPUBLIQUE DU CAMEROUN</p>
-            <p>Paix – Travail – Patrie</p>
-            <div className='mt-8'>
-              <div className='my-2 '>
-                <p>REGION</p>
-                <p>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
-              </div>
-              <div className='my-2'>
-                <p>DEPARTEMENT</p>
-                <p>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
-              </div>
-              <div className='my-2'>
-                <p>ARRONDISSEMENT</p>
-                <p>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
-              </div>
-            </div>
-          </div>
-          <div className='text-center'>
-            <p className='text-xl'>REPUBLIC OF CAMEROON</p>
-            <p>Peace – Work – Fatherland</p>
-            <div className='mt-8'>
-              <div className='my-2'>
-                <p>REGION</p>
-                <p>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
-              </div>
-              <div className='my-2'>
-                <p>DIVISION</p>
-                <p>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
-              </div>
-              <div className='my-2'>
-                <p>SUBDIVISION</p>
-                <p>_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _</p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div
+      className="certificate-container bg-white w-[595px] h-[890px] shadow-sm font-serif box-border"
+      style={{ fontSize: "10px", lineHeight: "1.2" }}
+    >
+    
+      <div
+        ref={pdfRef}
+        id="certificate-preview"
+        className="w-full h-full px-4 pt-2 flex flex-col text-black"
+      >
+        <CertificateHeader />
 
-        <div className='w-full text-center text-xl  mb-4'>
-          <p>CENTRE D’ÉTAT CIVIL / CIVIL STATUS REGISTRATION CENTRE</p>
+        <div className="w-full text-center text-[11px] mb-1">
+          <p>CENTRE D'ÉTAT CIVIL / CIVIL STATUS REGISTRATION CENTRE</p>
           <div>
-            <p className='inline-block text-[16px]'>
+            <p className="inline-block text-[10px]">
               de - of :{" "}
               <span>
-                _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-                _ _ _ _ _ _ _ _ _ _ _ _{" "}
+                _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
               </span>
             </p>
           </div>
         </div>
-        <div className='text-center text-md mb-4'>
+
+        <div className="text-center text-[9px] mb-1">
           <p>
-            <span className='font-bold'>
-              Centre d’état civil secondaire de rattachement{" "}
-            </span>
+            <span className="font-bold">
+              Centre d'état civil secondaire de rattachement
+            </span>{" "}
             (pour les centres secondaires)
           </p>
           <p>
@@ -127,384 +106,161 @@ const BirthCertificatePreviewForm: React.FC<CreateProps> = ({ formData = DEFAULT
             registry)
           </p>
         </div>
-        <p className='text-center'>
-          _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _{" "}
+
+        <p className="text-center text-[9px] mb-1">
+          _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
         </p>
-        <div className='text-center my-8 flex flex-col justify-center items-center'>
-          <h1 className='text-4xl font-bold uppercase'>
-            ACTE DE NAISSANCE / BIRTH CERTIFICATE
-          </h1>
 
-          <div className='w-[50%] mt-3 flex items-start justify-center gap-2'>
+        <CertificateTitle certificateNumber={formData.certificateNumber} />
+
+        <div className="w-full text-[10px] leading-[1.2]">
+          <CertificateField
+            labelFr="Nom de L'enfant :"
+            labelEn="surname of child"
+            value={formData.surName}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Prenoms de L'enfant :"
+            labelEn="Given name of the child"
+            value={formData.givenName}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Né le – Born on the:"
+            value={formData.dob}
+            className="my-1 justify-center"
+          />
+
+          <CertificateField
+            labelFr="A – at"
+            value={formData.placeOfBirth}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="De sexe / Sex:"
+            value={formData.sex}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="De – of:"
+            value={formData.fatherName}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Née à – Born at:"
+            value={formData.fatherPlaceOfBirth}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Le – On the:"
+            value={formData.fatherDob}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Domiciliée à – Resident at:"
+            value={formData.fatherResidence}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Profession – Occupation:"
+            value={formData.fatherOccupation}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Nationalité – Nationality:"
+            value={formData.fatherNationality}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Document de référence – Reference document:"
+            value={formData.fatherReferenceDocument}
+            className="my-1"
+          />
+          <ReferenceDocumentNote />
+
+          <CertificateField
+            labelFr="Et de – And of:"
+            value={formData.motherName}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Née à – Born at:"
+            value={formData.motherPlaceOfBirth}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Le – On the:"
+            value={formData.motherDob}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Domiciliée à – Resident at:"
+            value={formData.motherResidence}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Profession – Occupation:"
+            value={formData.motherOccupation}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Nationalité – Nationality:"
+            value={formData.motherNationality}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Document de référence – Reference document:"
+            value={formData.motherReferenceDocument}
+            className="my-1"
+          />
+          <ReferenceDocumentNote />
+
+          <CertificateField
+            labelFr="Dressé le – Drawn up on:"
+            value={formData.dateDrawn}
+            className="my-1"
+          />
+
+          <CertificateField
+            labelFr="Sur la déclaration de – In accordance with the declaration of:"
+            value={formData.declarant}
+            className="my-1"
+          />
+
+          <div className="w-full my-1 flex items-start gap-2">
             <div>
-              <p className='font-semibold text-2xl'> N°:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.certificateNumber || ""}
+              <p className="font-bold text-[10px]">
+                Lesquels ont certifié la sincérité de la présente déclaration
+              </p>
+              <p className="text-[10px]">
+                Who attested to the truth of this declaration:
               </p>
             </div>
           </div>
+
+          <CertificateFooter
+            officer={formData.officer}
+            secretary={formData.secretary}
+            dateDrawn={formData.dateDrawn}
+          />
         </div>
-
-
-        </div>
- 
-
-        {/* Body Section */}
-        <div className="w-[95%]">
-        <div className='text-base leading-7'>
-          {/* Child's Details */}
-          <div className='w-full flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Nom de L'enfant :</p>
-              <p className='-mt-2'>surname of child</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.surName || "[Child Name]"}{" "}
-              </p>
-            </div>
-          </div>
-          <div className='w-full my-1 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Prenoms de L'enfant :</p>
-              <p className='-mt-2'>Given name of the child</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.givenName || "[Child Name]"}{" "}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-3 flex items-start justify-center gap-2'>
-            <div>
-              <p className='font-semibold'>Né le – Born on the:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.dob || "[YYYY-MM-DD]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-3 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>A – at</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.placeOfBirth || ""}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-3 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>De sexe / Sex:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.sex || "[Sex]"}
-              </p>
-            </div>
-          </div>
-
-          {/* Father's Details */}
-          <div className='w-full my-3 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>De – of:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.fatherName || "[Father Name]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-3 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Née à – Born at:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.fatherPlaceOfBirth || "[Father Place of Birth]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-3 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Le – On the:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.fatherDob || "[YYYY-MM-DD]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full mt-3 mb-1 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Domiciliée à – Resident at:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.fatherResidence || "[Father Residence]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-1 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Profession – Occupation:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.fatherOccupation || "[Father Occupation]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full mt-1 mb-4 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Nationalité – Nationality:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.fatherNationality || "[Father Nationality]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>
-                Document de référence – Reference document:
-              </p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.fatherReferenceDocument ||
-                  "[Father Reference Document]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full flex items-start gap-2 mb-4'>
-            <div className='flex-1 text-sm italic'>
-              <p className='w-full border-b border-dotted border-transparent min-h-[24px]'>
-                (Numéro de la Carte Nationale d'identité, ou références de
-                l'acte de naissance, ou références du document prouvant la
-                nationalité )
-              </p>{" "}
-              <p>
-                ( National identity Card Number, or references of the Birth
-                Certificate, or References of the Document attesting the
-                Nationality)
-              </p>
-            </div>
-          </div>
-
-          {/* Mother's Details */}
-          <div className='w-full mt-2 mb-3 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Et de – And of:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.motherName || "[Mother Name]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-3 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Née à – Born at:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.motherPlaceOfBirth || "[Mother Place of Birth]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full mt-3 mb-2 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Le – On the:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.motherDob || "[YYYY-MM-DD]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-1 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Domiciliée à – Resident at:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.motherResidence || "[Mother Residence]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full my-1 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Profession – Occupation:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.motherOccupation || "[Mother Occupation]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full mt-1 mb-4 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Nationalité – Nationality:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.motherNationality || "[Mother Nationality]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>
-                Document de référence – Reference document:
-              </p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.motherReferenceDocument ||
-                  "[Mother Reference Document]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full flex items-start gap-2 mb-4'>
-            <div className='flex-1 text-sm italic'>
-              <p className='w-full border-b border-dotted border-transparent min-h-[24px]'>
-                (Numéro de la Carte Nationale d'identité, ou références de
-                l'acte de naissance, ou références du document prouvant la
-                nationalité )
-              </p>{" "}
-              <p>
-                ( National identity Card Number, or references of the Birth
-                Certificate, or References of the Document attesting the
-                Nationality)
-              </p>
-            </div>
-          </div>
-
-          {/* Issue Details */}
-          <div className='w-full flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>Dressé le – Drawn up on:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.dateDrawn || "[YYYY-MM-DD]"}
-              </p>
-            </div>
-          </div>
-
-          <div className='w-full flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'>
-                Sur la déclaration de – In accordance with the declaration of:
-              </p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'></p>
-            </div>
-          </div>
-          <p className='w-full border-b mb-2 border-dotted border-black min-h-[24px]'>
-            {formData.declarant || ""}
-          </p>
-
-          <div className='w-full my-6 flex items-start gap-2'>
-            <div>
-              <p className='font-bold'>
-                Lesquels ont certifié la sincérité de la présente déclaration{" "}
-              </p>
-              <p>Who attested to the truth of this declaration:</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Section */}
-        <div className="my-2">
-          <div className='w-full my-2 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'> Par Nous,By Us</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.officer}
-              </p>
-            </div>
-            <div>
-              <p>Officier</p>
-            </div>
-          </div>
-          <p className='-mt-1'>d’état civil – Civil Status Registrar</p>
-        </div>
-        <div>
-          <div className='w-full my-2 flex items-start gap-2'>
-            <div>
-              <p className='font-semibold'> Assistée de - In the presence of:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.secretary}
-              </p>
-            </div>
-            <div>
-              <p>Secretaire</p>
-            </div>
-          </div>
-          <p className='-mt-1'>d’état civil – The Civil
-          Status Secretary</p>
-        </div>
-
-        <div>
-        <div className='w-full my-3 flex justify-center gap-2'>
-          <div className="w-[50%] flex gap-2">
-          <div>
-              <p className='font-semibold'>Le – on the:</p>
-            </div>
-            <div className='flex-1'>
-              <p className='w-full border-b border-dotted border-black min-h-[24px]'>
-                {formData.dateDrawn}
-              </p>
-            </div>
-          </div>
-            
-          </div>
-        </div>
-
-        <div className="my-12 flex justify-between items-center" >
-         <div>
-          <p> Le Secretaire D’état Civil Registry</p>
-          <p>Secretary</p>
-         </div>
-         <div>
-          <p> Signature de Officier D’état Civil</p>
-          <p>Signature of Civil Status Registrar</p>
-         </div>
-        </div>
-        </div>
-        
-       
-       
       </div>
     </div>
   );

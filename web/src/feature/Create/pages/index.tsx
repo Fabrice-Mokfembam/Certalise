@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {  Save, Eye, EyeOff } from 'lucide-react';
 import BirthCertificatePreviewForm from './BirthCertiPreview';
 import ChildInfoSection from '../components/ChildInfoComponent';
 import FatherInfoSection from '../components/FatherInfoComponent';
 import MotherInfoSection from '../components/MotherInfoComponent';
 import DeclarationInfoSection from '../components/CivilStatusInfoComponent';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export interface FormData {
   certificateNumber: string;
@@ -79,6 +81,34 @@ const Create: React.FC = () => {
     setShowPreview(!showPreview);
   };
 
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPdf = async () => {
+    const element = printRef.current;
+    if (!element) {
+      return;
+    }
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+    });
+    const data = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: "a4",
+    });
+
+    const imgProperties = pdf.getImageProperties(data);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+
+    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
+
+    pdf.addImage(data, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save("examplepdf.pdf");
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
@@ -151,7 +181,7 @@ const Create: React.FC = () => {
           </button>
           <div className="flex space-x-3">
             <button
-              type="submit"
+              onClick={handleDownloadPdf}
               className="px-6 py-2 bg-[#2196F3] rounded-lg text-sm font-medium text-white hover:bg-[#2196F3]/90 flex items-center space-x-2"
             >
               <Save className="h-4 w-4" />
@@ -166,7 +196,7 @@ const Create: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-[#111827] mb-4">Certificate Preview</h2>
           <div className="rounded-lg p-4 flex justify-center">
-            <BirthCertificatePreviewForm formData={formData} />
+            <BirthCertificatePreviewForm pdfRef={printRef} formData={formData}/>
           </div>
         </div>
       )}

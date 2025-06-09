@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Save, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import ChildInfoSection from '../components/ChildInfoComponent';
 import FatherInfoSection from '../components/FatherInfoComponent';
 import MotherInfoSection from '../components/MotherInfoComponent';
@@ -40,6 +42,7 @@ const EditBirthCertificate: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
+  const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadCertificate = async () => {
@@ -91,11 +94,94 @@ const EditBirthCertificate: React.FC = () => {
     }));
   };
 
+  const handleDownloadPdf = async () => {
+    const element = pdfRef.current;
+    if (!element) return;
+  
+    try {
+      // Create a clone of the element to modify styles if needed
+      const elementClone = element.cloneNode(true) as HTMLElement;
+      document.body.appendChild(elementClone);
+      elementClone.style.position = 'absolute';
+      elementClone.style.left = '-9999px';
+  
+      // Replace unsupported color functions if they exist
+      const styleSheets = Array.from(document.styleSheets);
+      styleSheets.forEach((sheet) => {
+        try {
+          const rules = Array.from(sheet.cssRules || []);
+          rules.forEach((rule) => {
+            if (rule instanceof CSSStyleRule) {
+              if (rule.style.cssText.includes('oklch')) {
+                rule.style.cssText = rule.style.cssText.replace(
+                  /oklch\([^)]+\)/g,
+                  '#2196F3' // Replace with your fallback color
+                );
+              }
+            }
+          });
+        } catch (e) {
+          console.warn('Could not access stylesheet rules', e);
+        }
+      });
+  
+      const canvas = await html2canvas(elementClone, {
+        scale: 2,
+        useCORS: true,
+        logging: true,
+        ignoreElements: (element) => {
+          // Ignore elements that might cause issues
+          return element.classList.contains('no-print');
+        },
+        onclone: (clonedDoc) => {
+          // Additional modifications to the cloned document if needed
+          const elements = clonedDoc.querySelectorAll('*');
+          elements.forEach((el) => {
+            const styles = window.getComputedStyle(el);
+            if (styles.color.includes('oklch') || styles.backgroundColor.includes('oklch')) {
+              (el as HTMLElement).style.color = '#000000';
+              (el as HTMLElement).style.backgroundColor = '#FFFFFF';
+            }
+          });
+        }
+      });
+  
+      document.body.removeChild(elementClone);
+  
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+  
+      const imgWidth = 210; // A4 width in mm
+      
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`birth_certificate_${formData.certificateNumber || id}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      // Fallback to simple PDF generation if the above fails
+      try {
+        const pdf = new jsPDF();
+        pdf.text('Birth Certificate', 10, 10);
+        pdf.text(`Certificate Number: ${formData.certificateNumber}`, 10, 20);
+        pdf.text(`Child: ${formData.givenName} ${formData.surName}`, 10, 30);
+        pdf.save(`birth_certificate_${formData.certificateNumber || id}_simple.pdf`);
+      } catch (fallbackError) {
+        console.error('Fallback PDF generation failed:', fallbackError);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       console.log("Form submitted:", formData);
-      navigate(`/certificates/${id}`, { state: { success: true } });
+      await handleDownloadPdf(); // Download PDF when saving
+      console.log("downloaded");
     } catch (err) {
       setError('Failed to update certificate');
       console.error(err);
@@ -125,7 +211,7 @@ const EditBirthCertificate: React.FC = () => {
           Back to Certificate
         </button>
         <h1 className="text-2xl font-bold text-gray-800">Edit Birth Certificate</h1>
-        <div className="w-24"></div> {/* Spacer for alignment */}
+        <div className="w-24"></div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
@@ -209,22 +295,23 @@ const EditBirthCertificate: React.FC = () => {
               className="px-6 py-2 bg-[#2196F3] rounded-lg text-sm font-medium text-white hover:bg-[#2196F3]/90 flex items-center space-x-2"
             >
               <Save className="h-4 w-4" />
-              <span>Save Changes</span>
+              <span>Save & Download</span>
             </button>
           </div>
         </div>
       </form>
 
-      {/* Preview Section */}
+      {/* Preview Section with PDF ref */}
       {showPreview && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-[#111827] mb-4">Certificate Preview</h2>
-          <div className="rounded-lg p-4 flex justify-center">
+          <div ref={pdfRef} className="border border-gray-200 rounded-lg p-4">
             <BirthCertificatePreviewForm formData={formData} />
           </div>
         </div>
       )}
     </div>
+    
   );
 };
 

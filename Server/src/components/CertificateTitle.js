@@ -1,3 +1,5 @@
+import React from "react";
+
 export const CertificateTitle = ({ certificateNumber }) => {
     return React.createElement('div', { className: 'text-center my-1 flex flex-col justify-center items-center' },
       React.createElement('h1', { className: 'text-[12px] font-bold uppercase' }, 'ACTE DE NAISSANCE / BIRTH CERTIFICATE'),

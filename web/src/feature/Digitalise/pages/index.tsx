@@ -1,14 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import { UploadCloud, X, Scan, FileText } from 'lucide-react';
+import { useProcessCertificateImage } from '../../Create/hooks/useCertificate';
 
 const Digitalise: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  const { mutate: processImage, isPending} = useProcessCertificateImage();
+
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       processFile(e.dataTransfer.files[0]);
     }
@@ -22,13 +24,9 @@ const Digitalise: React.FC = () => {
 
   const processFile = (file: File) => {
     setSelectedFile(file);
-    
-    // Create preview for images
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onload = () => {
-        setPreviewUrl(reader.result as string);
-      };
+      reader.onload = () => setPreviewUrl(reader.result as string);
       reader.readAsDataURL(file);
     } else {
       setPreviewUrl(null);
@@ -40,10 +38,19 @@ const Digitalise: React.FC = () => {
     setPreviewUrl(null);
   };
 
+  const handleProcessImage = () => {
+    if (!selectedFile) {
+      console.error('No file selected');
+      return;
+    }
+    processImage(selectedFile, {
+      onSuccess: (data) => console.log('Extracted data:', data),
+      onError: (err) => console.error('Error processing image:', err),
+    });
+  };
+
   return (
-    <div className="max-w-3xl mx-auto  p-6">
-  
-      
+    <div className="max-w-3xl mx-auto p-6">
       {!selectedFile ? (
         <div 
           className="border-2 border-dashed border-[#2196F3] mt-20 rounded-xl p-12 text-center cursor-pointer hover:bg-[#2196F3]/5 transition-colors"
@@ -105,10 +112,12 @@ const Digitalise: React.FC = () => {
               Upload Another
             </button>
             <button
+              onClick={handleProcessImage}
               className="flex-1 py-3 px-4 bg-[#2196F3] text-white rounded-lg hover:bg-[#2196F3]/90 transition-colors flex items-center justify-center space-x-2"
+              disabled={isPending}
             >
               <Scan className="h-5 w-5" />
-              <span>Continue to Scan</span>
+              <span>{isPending ? 'Processing...' : 'Continue to Scan'}</span>
             </button>
           </div>
         </div>

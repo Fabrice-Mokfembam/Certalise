@@ -1,3 +1,5 @@
+import React from "react";
+
 export const ReferenceDocumentNote = () => {
     return React.createElement('div', { className: 'w-full flex items-start gap-1 mb-1' },
       React.createElement('div', { className: 'flex-1 text-[8px] italic' },

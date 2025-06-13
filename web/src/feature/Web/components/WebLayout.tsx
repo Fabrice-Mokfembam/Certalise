@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { 
   UploadCloud, 
   FilePlus, 
@@ -10,8 +10,12 @@ import {
   User,
   LayoutDashboard
 } from 'lucide-react';
+import { useUser } from '../../../hooks/useUser';
 
 const WebLayout: React.FC = () => {
+const navigate = useNavigate();
+  const {authUser} = useUser()
+
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar with right border */}
@@ -66,11 +70,11 @@ const WebLayout: React.FC = () => {
               <button className="p-1 rounded-full text-[#4B5563] hover:bg-gray-100">
                 <Bell className="h-5 w-5" />
               </button>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 cursor-pointer"  onClick={()=>navigate(`/profile/${authUser?.username}`)}>
                 <div className="h-8 w-8 rounded-full bg-[#2196F3] flex items-center justify-center">
                   <User className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-sm font-medium text-[#111827]">John Doe</span>
+                <span className="text-sm font-medium text-[#111827]">{authUser?.username.split(' ')[0] || 'John Doe'}</span>
               </div>
             </div>
           </div>

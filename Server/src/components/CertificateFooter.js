@@ -1,3 +1,6 @@
+import React from "react";
+import { CertificateField } from "./CertificateField.js";
+
 export const CertificateFooter = ({ officer, secretary, dateDrawn }) => {
     return React.createElement(React.Fragment, null,
       React.createElement('div', null,

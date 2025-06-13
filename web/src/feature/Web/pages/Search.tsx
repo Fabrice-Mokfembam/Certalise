@@ -1,41 +1,42 @@
 import React, { useState } from 'react';
 import { Search, Filter, Calendar } from 'lucide-react';
 import CertificateCard from '../components/CertificateCard';
-
-interface Certificate {
-  id: string;
-  certificateNumber: string;
-  surName: string;
-  givenName: string;
-  dob: string;
-  status: 'Verified' | 'Pending' | 'Expired';
-}
+import { useCertificates } from '../../Create/hooks/useCertificate';
+import type { FormData } from '../../Create/pages';
 
 const SearchArchives: React.FC = () => {
-  // Sample data (only birth certificates)
-  const certificates: Certificate[] = [
-    { id: 'CID:12345', certificateNumber: '12845', surName: 'Doe', givenName: 'John', dob: '2023-05-15', status: 'Verified' },
-    { id: 'CID:12346', certificateNumber: '12846', surName: 'Smith', givenName: 'Jane', dob: '2022-08-22', status: 'Verified' },
-    { id: 'CID:12347', certificateNumber: '12847', surName: 'Johnson', givenName: 'Michael', dob: '2021-11-10', status: 'Pending' },
-    { id: 'CID:12348', certificateNumber: '12848', surName: 'Wilson', givenName: 'Robert', dob: '2023-02-18', status: 'Verified' },
-    { id: 'CID:12349', certificateNumber: '12849', surName: 'Williams', givenName: 'Sarah', dob: '2022-09-30', status: 'Expired' },
-  ];
-
+  const { data: certificates = [], isLoading, error } = useCertificates();
   const [searchTerm, setSearchTerm] = useState('');
   const [yearFilter, setYearFilter] = useState<number | null>(null);
 
-  const filteredCertificates = certificates.filter((cert) => {
+  // Loading and error states at the top
+  if (isLoading) return <div>Loading certificates...</div>;
+  if (error) return <div>Error loading certificates: {error.message}</div>;
+
+  // Safe date parsing function
+  const parseDate = (dateString: string | Date): Date => {
+    if (dateString instanceof Date) return dateString;
+    return new Date(dateString);
+  };
+
+  const filteredCertificates = certificates.filter((cert: FormData) => {
     const matchesSearch =
       `${cert.givenName} ${cert.surName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cert.certificateNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cert.id.toLowerCase().includes(searchTerm.toLowerCase());
+      cert.certificateNumber.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesYear = yearFilter ? new Date(cert.dob).getFullYear() === yearFilter : true;
+    // Safe year extraction with fallback
+    const certYear = cert.dob ? parseDate(cert.dob).getFullYear() : 0;
+    const matchesYear = yearFilter ? certYear === yearFilter : true;
 
     return matchesSearch && matchesYear;
   });
 
-  const availableYears = [...new Set(certificates.map((c) => new Date(c.dob).getFullYear()))].sort((a, b) => b - a);
+  // Get unique years safely
+  const availableYears = [...new Set(
+    certificates
+      .filter((cert: FormData) => cert.dob) 
+      .map((cert: FormData) => parseDate(cert.dob).getFullYear())
+  )].sort((a, b) => b - a);
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -99,8 +100,8 @@ const SearchArchives: React.FC = () => {
       {/* Results */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCertificates.length > 0 ? (
-          filteredCertificates.map((cert) => (
-            <CertificateCard key={cert.id} certificate={cert} />
+          filteredCertificates.map((cert: FormData) => (
+            <CertificateCard key={cert.certificateNumber} certificate={cert} />
           ))
         ) : (
           <div className="col-span-full text-center py-12 bg-gray-50 rounded-lg">

@@ -1,3 +1,5 @@
+import React from "react";
+
 export const CertificateField = ({ labelFr, labelEn, value, className = '' }) => {
     return React.createElement('div', { className: `w-full flex items-start gap-1 ${className}` },
       React.createElement('div', null,

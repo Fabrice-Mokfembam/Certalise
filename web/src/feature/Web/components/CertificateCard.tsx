@@ -5,6 +5,10 @@ import type { FormData } from "../../Create/pages";
 import { useDeleteCertificate, useGenerateCertificatePDF } from "../../Create/hooks/useCertificate";
 import { Loader2 } from "lucide-react";
 
+// Assuming you might have a placeholder image or a default icon if imageUrl is not present
+// If you don't have a specific placeholder image, `FileText` will serve as the fallback.
+// import PlaceholderImage from 'path/to/your/placeholder.png'; // Uncomment if you have one
+
 const CertificateCard: React.FC<{ certificate: FormData }> = ({ certificate }) => {
   const navigate = useNavigate();
 
@@ -31,7 +35,7 @@ const CertificateCard: React.FC<{ certificate: FormData }> = ({ certificate }) =
 
   const handleDownloadClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-  
+
     generatePDF(certificate, {
       onSuccess: (pdfBlob) => {
         const url = window.URL.createObjectURL(pdfBlob);
@@ -68,7 +72,7 @@ const CertificateCard: React.FC<{ certificate: FormData }> = ({ certificate }) =
   const isBusy = isDeleting || isGenerating;
 
   return (
-    <div 
+    <div
       className='w-full h-64 bg-white rounded-xl border border-gray-200 cursor-pointer hover:shadow-md transition-shadow relative'
       onClick={handleCardClick}
     >
@@ -80,29 +84,37 @@ const CertificateCard: React.FC<{ certificate: FormData }> = ({ certificate }) =
 
       <div className='p-4 h-full flex flex-col'>
         <div className='w-full h-30 bg-[#F9FAFB] rounded-lg flex justify-center items-center flex-1'>
-          <FileText className='h-8 w-8 text-[#9CA3AF]' />
+          {certificate.imageUrl ? (
+            <img
+              src={certificate.imageUrl}
+              alt={`${certificate.givenName} ${certificate.surName} Certificate Preview`}
+              className="h-full w-full object-cover " // Apply same dimensions and object-contain
+            />
+          ) : (
+            <FileText className='h-8 w-8 text-[#9CA3AF]' />
+          )}
         </div>
 
         <div className="p-2 space-y-1">
           <h3 className='text-md font-semibold text-gray-900'>
-            {`${certificate.givenName} ${certificate.surName}`}
+            {`${certificate.surName} ${certificate.givenName} `}
           </h3>
           <p className='text-sm text-gray-600'>
-            CIN : {certificate.certificateNumber}
+            CIN : {certificate.certificateNumber.toString().replace(/\//g,'')}
           </p>
         </div>
 
         <div className="flex gap-4 p-2 mt-2 justify-end">
-          <Download 
-            className="size-4 cursor-pointer text-gray-500 hover:text-blue-500" 
+          <Download
+            className="size-4 cursor-pointer text-gray-500 hover:text-blue-500"
             onClick={handleDownloadClick}
           />
-          <Edit 
-            className="size-4 cursor-pointer text-gray-500 hover:text-yellow-500" 
+          <Edit
+            className="size-4 cursor-pointer text-gray-500 hover:text-yellow-500"
             onClick={handleEditClick}
           />
-          <Trash2 
-            className="size-4 cursor-pointer text-gray-500 hover:text-red-500" 
+          <Trash2
+            className="size-4 cursor-pointer text-gray-500 hover:text-red-500"
             onClick={handleDeleteClick}
           />
         </div>

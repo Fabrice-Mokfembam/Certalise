@@ -15,10 +15,17 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [ 
+  'http://localhost:5173',  // Your default
+  'http://localhost:19006', // Expo web
+  'http://localhost:8081',    // Production domain
+  'exp://10.209.160.204:8081' // Expo mobile (replace with actual IP)
+];
+
 app.use(
   cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
+    origin: ['*','http://localhost:5173','http://localhost:8081'], // Allows all origins
+    credentials: true, // Still allows cookies/auth headers to be sent
   })
 );
 

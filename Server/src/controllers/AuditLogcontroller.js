@@ -10,7 +10,7 @@ export const getAllAuditLogs = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-};
+}; 
 
 // Get audit logs by user
 export const getAuditLogsByUser = async (req, res) => {
@@ -23,8 +23,8 @@ export const getAuditLogsByUser = async (req, res) => {
     if (!auditLogs.length) {
       return res.status(404).json({ message: 'No audit logs found for this user' });
     }
-    res.json(auditLogs);
-  } catch (error) {
+    res.json(auditLogs); 
+  } catch (error) { 
     res.status(500).json({ message: error.message });
   }
 };

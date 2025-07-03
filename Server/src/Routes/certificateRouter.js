@@ -14,7 +14,7 @@ import upload from '../middlewares/multerMidleware.js';
 const router = express.Router();
 
 // Apply auth middleware to all routes
-router.use(authMiddleware);
+router.use(authMiddleware); 
 
 // CRUD Routes using certificateNumber
 router.post('/', createCertificate);

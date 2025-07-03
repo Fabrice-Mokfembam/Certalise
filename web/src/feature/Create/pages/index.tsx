@@ -7,6 +7,7 @@ import FatherInfoSection from '../components/FatherInfoComponent';
 import MotherInfoSection from '../components/MotherInfoComponent';
 import DeclarationInfoSection from '../components/CivilStatusInfoComponent';
 import { useCreateCertificate, useGenerateCertificatePDF } from '../hooks/useCertificate';
+import { useLocation } from 'react-router-dom';
 
 
 export interface FormData {
@@ -32,19 +33,52 @@ export interface FormData {
   motherReferenceDocument: string;
   dateDrawn: string;
   declarant: string;
+  createdAt:Date | string;
   officer: string;
   secretary: string;
   imageUrl?: string ,
     pdfUrl?: string ,
 }
 
+const initialFormData: FormData = {
+  certificateNumber: '',
+  surName: '',
+  givenName: '',
+  sex: '',
+  placeOfBirth: '',
+  dob: '',
+  fatherName: '',
+  fatherPlaceOfBirth: '',
+  fatherDob: '',
+  fatherResidence: '',
+  fatherOccupation: '',
+  fatherNationality: '',
+  fatherReferenceDocument: '',
+  motherName: '',
+  motherPlaceOfBirth: '',
+  motherDob: '',
+  motherResidence: '',
+  motherOccupation: '',
+  motherNationality: '',
+  motherReferenceDocument: '',
+  dateDrawn: '',
+  declarant: '',
+  officer: '',
+  secretary: '',
+  imageUrl: '',
+  createdAt:'',
+  pdfUrl: '',
+};
+
 const Create: React.FC = () => {
   const {mutate,isPending,error} = useCreateCertificate()
   const {mutate:generate,isPending:generatePending,error:generateError} = useGenerateCertificatePDF()
 
+  const location = useLocation();
 
 
-  const [formData, setFormData] = useState<FormData>({
+
+  const [formData, setFormData] = useState<FormData>(location.state?.formData || {
     certificateNumber: '',
     surName: '',
     givenName: '',
@@ -67,6 +101,7 @@ const Create: React.FC = () => {
     motherReferenceDocument: '',
     dateDrawn: '',
     declarant: '',
+    imageUrl: '' ,
     officer: '',
     secretary: '',
   });
@@ -78,6 +113,10 @@ const Create: React.FC = () => {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const clearFormInputs = () => {
+    setFormData(initialFormData);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -101,11 +140,13 @@ const Create: React.FC = () => {
             setTimeout(() => {
               document.body.removeChild(link);
               window.URL.revokeObjectURL(url);
+              clearFormInputs();
             }, 100);
           },
           onError: (error) => {
             console.error('PDF generation failed:', error);
             alert('Failed to generate PDF. Please try again.');
+
           }
         })
       }
@@ -151,8 +192,8 @@ const Create: React.FC = () => {
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
         <ChildInfoSection
           formData={{
-            surName: formData.surName,
-            givenName: formData.givenName,
+            surName: formData.givenName,
+            givenName: formData.surName,
             sex: formData.sex,
             dob: formData.dob,
             placeOfBirth: formData.placeOfBirth,
@@ -224,7 +265,7 @@ const Create: React.FC = () => {
       ${isPending || generatePending ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#2196F3] hover:bg-[#2196F3]/90'} 
       text-white`}
   >
-    <Save className="h-4 w-4" />
+    <Save className="h-4 w-4"/>
     <span>
       {isPending
         ? 'Saving...'
@@ -240,10 +281,7 @@ const Create: React.FC = () => {
 {generateError && (
   <p className="text-sm text-red-500 mt-2">Failed to generate PDF. Please try again.</p>
 )}
-
-
-        </div>
-      </form>
+  </div> </form>
 
       {/* Preview Section */}
       {showPreview && (
@@ -252,6 +290,18 @@ const Create: React.FC = () => {
           <div className="rounded-lg p-4 flex justify-center">
             <BirthCertificatePreviewForm pdfRef={printRef} formData={formData} />
           </div>
+          {formData.imageUrl && (
+      <div className="mt-6">
+        <h3 className="text-lg font-medium text-[#111827] mb-2">Uploaded Document</h3>
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <img
+            src={formData.imageUrl}
+            alt="Uploaded document"
+            className="w-full h-auto max-h-96 object-contain mx-auto"
+          />
+        </div>
+      </div>
+    )}
         </div>
       )}
     </div>

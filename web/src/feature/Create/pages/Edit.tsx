@@ -8,6 +8,8 @@ import DeclarationInfoSection from '../components/CivilStatusInfoComponent';
 import BirthCertificatePreviewForm from './BirthCertiPreview';
 import { useCertificate, useUpdateCertificate } from '../hooks/useCertificate';
 
+
+
 const EditBirthCertificate: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -100,8 +102,8 @@ const EditBirthCertificate: React.FC = () => {
         {/* Form sections remain the same */}
         <ChildInfoSection 
           formData={{
-            surName: formData.surName,
-            givenName: formData.givenName,
+            surName: formData.givenName,
+            givenName: formData.surName,
             sex: formData.sex,
             dob: formData.dob,
             placeOfBirth: formData.placeOfBirth
@@ -184,8 +186,8 @@ const EditBirthCertificate: React.FC = () => {
               <span>{isPending ? 'Saving...' : 'Save Changes'}</span>
             </button>
             {error && (
-  <p className="text-sm text-red-500 mt-2">Failed to save Edit. Please try again.</p>
-)}
+                 <p className="text-sm text-red-500 mt-2">Failed to save Edit. Please try again.</p>
+            )}
   
           </div>
         </div>

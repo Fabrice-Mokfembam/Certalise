@@ -25,7 +25,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="scan"
         options={{
-          title: 'scan',
+          title: 'Digitalise',
           tabBarIcon: ({ color, focused }) => (
             <Feather name="camera" color={color} size={focused ? 28 : 24} />
           ),

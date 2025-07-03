@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 from dateutil.parser import parse
 import re
+from fuzzywuzzy import fuzz
 
 reader = easyocr.Reader(['en'])
 
@@ -13,14 +14,14 @@ def preprocess_image(image_path):
     if img is None:
         raise ValueError("Invalid image")
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (3, 3), 0)  # Softer blur
-    thresh = cv2.adaptiveThreshold(
-        # Larger blockSize, higher C
-        gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 5)
+    # Softer blur and no aggressive thresholding for handwritten text
+    blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+    _, thresh = cv2.threshold(
+        blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # Otsu thresholding
     return thresh
 
 
-def is_near(key_box, val_box, y_thresh=200, x_thresh=600):
+def is_near(key_box, val_box, y_thresh=300, x_thresh=800):  # Looser thresholds
     key_x1, key_y1 = key_box[0]
     key_x2, key_y2 = key_box[2]
     val_x1, val_y1 = val_box[0]
@@ -42,121 +43,92 @@ def normalize_date(date_str):
         return date_str
 
 
+# ... (keep existing imports and functions)
+
 def process_image_data(image_path):
     img = preprocess_image(image_path)
     results = reader.readtext(img)
     if not results:
         raise ValueError("No text detected")
 
-    # Define fields with empty strings as default
+    print("\n--- Raw OCR Results ---")
+    for box, text, conf in results:
+        print(f"Text: '{text}', Conf: {conf:.2f}, Box: {box}")
+    print("-----------------------\n")
+
     data = {
-        "Number": "",
-        "Surname of the child": "",
-        "First name(s) of the child": "",
-        "Born on the": "",
-        "At": "",
-        "Sex": "",
-        "Of": "",
-        "Born at": "",
-        "On the": "",
-        "Resident at": "",
-        "Occupation": "",
-        "Nationality": "",
-        "Reference document": "",
-        # Father's info
-        "And of": "",
-        "Born at (Father)": "",
-        "On the (Father)": "",
-        "Resident at (Father)": "",
-        "Occupation (Father)": "",
-        "Nationality (Father)": "",
-        "Reference document (Father)": "",
-        # Mother's info
-        "Born at (Mother)": "",
-        "On the (Mother)": "",
-        "Resident at (Mother)": "",
-        "Occupation (Mother)": "",
-        "Nationality (Mother)": "",
-        "Reference document (Mother)": "",
-        "Drawn up on the": "",
-        "Sworn on the": "",
-        "Who attested to the truth of this declaration": "",
-        "By Us": "",
-        "Civil Status Registrar": "",
-        "Assisted by": "",
-        "Signature of Civil Status Registrar": ""
+        # ... (your existing data dictionary)
     }
 
     used_indexes = set()
     for i, (key_box, key_text, key_conf) in enumerate(results):
         key_text_lower = key_text.lower().strip()
         matched_field = None
-        # Map OCR text to fields
+
         field_mapping = {
-            "n°": "Number",
-            "nom de l'enfant": "Surname of the child",
-            "prénom(s) du child": "First name(s) of the child",
-            "né(e) - born on the": "Born on the",
-            "à - at": "At",
-            "de sexe - sex": "Sex",
-            "de - of": "Of",
-            "né à - born at": "Born at",
-            "le - on the": "On the",
-            "domicilié à - resident at": "Resident at",
-            "profession - occupation": "Occupation",
-            "nationalité - nationality": "Nationality",
-            "document de référence - reference document": "Reference document",
-            "et de - and of": "And of",
-            # First occurrence for father
-            "né(e) à - born at": "Born at (Father)",
-            # First occurrence for father
-            "le - on the": "On the (Father)",
-            "domicilié à - resident at": "Resident at (Father)",
-            "profession - occupation": "Occupation (Father)",
-            "nationalité - nationality": "Nationality (Father)",
-            "document de référence - reference document": "Reference document (Father)",
-            # Second occurrence for mother
-            "né(e) à - born at": "Born at (Mother)",
-            # Second occurrence for mother
-            "le - on the": "On the (Mother)",
-            "domicilié à - resident at": "Resident at (Mother)",
-            "profession - occupation": "Occupation (Mother)",
-            "nationalité - nationality": "Nationality (Mother)",
-            "document de référence - reference document": "Reference document (Mother)",
-            "dressée le - drawn up on the": "Drawn up on the",
-            "juré le - sworn on the": "Sworn on the",
-            "lesquels ont certifié à la sincérité de la présente déclaration, who attested to the truth of this declaration": "Who attested to the truth of this declaration",
-            "par nous, - by us,": "By Us",
-            "d’état civil / civil status registrar": "Civil Status Registrar",
-            "assisté de - assisted by": "Assisted by",
-            "signature de l’officier d’état civil / signature of civil status registrar": "Signature of Civil Status Registrar"
+            # ... (your existing field_mapping)
         }
 
+        # Debug: Check key matching
         for key_pattern, field_name in field_mapping.items():
-            if key_pattern in key_text_lower:
+            ratio = fuzz.partial_ratio(key_pattern, key_text_lower)
+            if ratio > 70:  # Your current threshold
                 matched_field = field_name
+                print(
+                    f"Matched Key: '{key_text}' (Original: '{key_pattern}') to Field: '{matched_field}' with Ratio: {ratio}")
                 break
 
         if matched_field:
             best_value = ""
             best_score = float('inf')
             best_index = None
+
+            print(
+                f"  --> Searching for value for field: '{matched_field}' (Key Text: '{key_text}')")
+            print(f"      Key Box: {key_box}")
+
             for j, (val_box, val_text, val_conf) in enumerate(results):
-                if j != i and j not in used_indexes and is_near(key_box, val_box):
-                    dist_x = val_box[0][0] - key_box[2][0]
-                    dist_y = abs(val_box[0][1] - key_box[0][1])
-                    score = dist_x + dist_y * 0.5
-                    val_text_clean = val_text.strip()
-                    if matched_field in ["First name(s) of the child", "Resident at (Father)", "Resident at (Mother)"] and not validate_name(val_text_clean):
-                        continue
-                    if matched_field in ["Born on the", "On the (Father)", "On the (Mother)"]:
-                        val_text_clean = normalize_date(val_text_clean)
-                    if score < best_score:
-                        best_score = score
-                        best_value = val_text_clean
-                        best_index = j
+                if j != i and j not in used_indexes:
+                    # Debug: Print potential value candidates and proximity check
+                    # You might need to adjust y_thresh and x_thresh in is_near based on observations
+                    # Your current thresholds
+                    is_candidate_near = is_near(
+                        key_box, val_box, y_thresh=300, x_thresh=800)
+
+                    if is_candidate_near:
+                        dist_x = val_box[0][0] - key_box[2][0]
+                        dist_y = abs(val_box[0][1] - key_box[0][1])
+                        score = dist_x + dist_y * 0.5
+                        val_text_clean = val_text.strip()
+
+                        print(
+                            f"    Potential Value Candidate: '{val_text_clean}', Box: {val_box}, Dist_X: {dist_x}, Dist_Y: {dist_y}, Score: {score}")
+
+                        # Existing validation and normalization
+                        if matched_field in ["First name(s) of the child", "Resident at (Father)", "Resident at (Mother)"] and not validate_name(val_text_clean):
+                            print(f"      - Rejected by name validation.")
+                            continue
+                        if matched_field in ["Born on the", "On the (Father)", "On the (Mother)"]:
+                            normalized_val = normalize_date(val_text_clean)
+                            if normalized_val == val_text_clean and not re.match(r'\d{4}-\d{2}-\d{2}', normalized_val):
+                                print(f"      - Rejected by date normalization.")
+                                continue  # If normalization fails to change it to the expected format
+                            val_text_clean = normalized_val
+
+                        if score < best_score:
+                            best_score = score
+                            best_value = val_text_clean
+                            best_index = j
+                            print(
+                                f"      - New Best Value Candidate: '{best_value}' (Score: {best_score})")
+
             if best_value:
                 data[matched_field] = best_value
                 used_indexes.add(best_index)
+                print(
+                    f"  +++ Assigned Value: '{best_value}' to Field: '{matched_field}' (Used Index: {best_index})\n")
+            else:
+                print(
+                    f"  --- No suitable value found for field: '{matched_field}'\n")
 
     return data
